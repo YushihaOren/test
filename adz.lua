@@ -1,42 +1,44 @@
 -- [[ 🛡️ TITAN SECURITY - AUTO LINK SYSTEM ]]
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local ServerURL = "HÃY_DÁN_LINK_NGROK_CỦA_ÔNG_VÀO_ĐÂY" -- Ví dụ: https://abcd-123.ngrok-free.app
+local ServerURL = "https://pitchy-scrawly-ida.ngrok-free.dev" -- Ví dụ: https://abcd-123.ngrok-free.app
 
 local KeyWindow = OrionLib:MakeWindow({Name = "Titan Security v14", HidePremium = true, SaveConfig = false, IntroText = "Titan Security"})
 local Tab = KeyWindow:MakeTab({Name = "Kích hoạt", Icon = "rbxassetid://4483345998"})
 
 local inputKey = ""
 Tab:AddTextbox({
-	Name = "Nhập Key bản quyền",
-	Default = "",
-	TextDisappear = false,
-	Callback = function(Value) inputKey = Value end	  
+    Name = "Nhập Key bản quyền",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Value) inputKey = Value end      
 })
 
 Tab:AddButton({
-	Name = "Kiểm tra & Khởi chạy",
-	Callback = function()
+    Name = "Kiểm tra & Khởi chạy",
+    Callback = function()
         local Player = game.Players.LocalPlayer
-        local RID = tostring(Player.UserId) -- Tự động lấy Roblox ID
+        local RID = tostring(Player.UserId)
         local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 
-        -- Gửi request check, Server sẽ tự liên kết RID nếu là lần đầu
-        local res = game:HttpGet(ServerURL .. "/api/check?key=" .. inputKey .. "&hwid=" .. HWID .. "&rid=" .. RID)
+        -- Gửi request check về b.js
+        local success, res = pcall(function()
+            return game:HttpGet(ServerURL .. "/api/check?key=" .. inputKey .. "&hwid=" .. HWID .. "&rid=" .. RID)
+        end)
 
-        if res == "SUCCESS_GRANTED" then
+        if success and res == "SUCCESS_GRANTED" then
             OrionLib:MakeNotification({Name = "Thành công", Content = "Đã xác thực acc: "..Player.Name, Time = 3})
             wait(1)
             KeyWindow:Destroy()
-            StartMainScript() -- Chạy script farm của ông
+            StartMainScript() -- CHẠY CODE FARM CỦA ÔNG
         else
-            OrionLib:MakeNotification({Name = "Lỗi", Content = "Thông báo: "..res, Time = 5})
+            OrionLib:MakeNotification({Name = "Lỗi", Content = "Thông báo: "..(res or "Server Offline"), Time = 5})
         end
-	end
+    end
 })
 
--- HÀM CHỨA CODE FARM GỐC CỦA ÔNG
+-- HÀM CHỨA TOÀN BỘ CODE GỐC CỦA ÔNG
 function StartMainScript()
-    -- PHẦN CODE CHỌN TEAM CỦA ÔNG
+    -- [1] CODE CHỌN TEAM
     repeat wait()
         pcall(function()
             if getgenv().Marines then
@@ -50,12 +52,46 @@ function StartMainScript()
             end
         end)
     until game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam") and not game:GetService("Players").LocalPlayer.PlayerGui.Main:WaitForChild("ChooseTeam").Visible or not game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam")
-    
-    -- Dưới đây ông dán tiếp toàn bộ phần Orion Lib tạo Menu của file adz.lua cũ vào là xong.
-    print("Script đã liên kết thành công với Roblox ID!")
-end
 
--- Chạy hàm check, nếu thất bại thì dừng toàn bộ script bên dưới
+    repeat wait() until game:GetService("Players").LocalPlayer:FindFirstChild("WeaponAssetCache")
+
+    -- [2] ANTI IDLE
+    local vu = game:GetService("VirtualUser")
+    game:GetService("Players").LocalPlayer.Idled:connect(function()
+        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+
+    -- [3] GIAO DIỆN CHÍNH (ORION LIB)
+    local Window = OrionLib:MakeWindow({Name = "TITAN v14 - Blox Fruit", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionTest"})
+    
+    -- Các Tab của ông (Ví dụ Tab 11)
+    local Tab11 = Window:MakeTab({Name = "Stats", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    
+    Tab11:AddToggle({
+        Name = "Melee",
+        Default = false,
+        Callback = function(Value) _G.StatsMelee = Value end    
+    })
+    
+    -- PHẦN FIX LỖI TABLESTATS CỦA ÔNG
+    local tablestats = {
+        ["Melee"] = false,
+        ["Defense"] = false,
+        ["Sword"] = false,
+        ["Gun"] = false,
+        ["Demon Fruit"] = false,
+    }
+
+    spawn(function()
+        while task.wait() do 
+            -- Code logic farm stats của ông để ở đây
+        end
+    end)
+    
+    OrionLib:Init() -- KHỞI TẠO LẠI SAU KHI NHẬP KEY
+end
 if not VerifyAuth() then return end
 
 repeat wait()
