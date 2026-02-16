@@ -1,38 +1,58 @@
--- [[ 🛡️ TITAN SECURITY CHECK ]]
-local HttpService = game:GetService("HttpService")
-local Player = game.Players.LocalPlayer
-local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+-- [[ 🛡️ TITAN SECURITY - AUTO LINK SYSTEM ]]
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local ServerURL = "HÃY_DÁN_LINK_NGROK_CỦA_ÔNG_VÀO_ĐÂY" -- Ví dụ: https://abcd-123.ngrok-free.app
 
--- Địa chỉ Server của ông (Phải khớp với BASE_URL trong b.js)
-local ServerURL = "http://IP_VPS_CUA_BAN:3000" 
+local KeyWindow = OrionLib:MakeWindow({Name = "Titan Security v14", HidePremium = true, SaveConfig = false, IntroText = "Titan Security"})
+local Tab = KeyWindow:MakeTab({Name = "Kích hoạt", Icon = "rbxassetid://4483345998"})
 
--- 1. Kiểm tra xem có chạy qua Loader không
-if not getgenv().TitanKey then
-    Player:Kick("\n🛡️ [TITAN AUTH]\nLỗi: Không tìm thấy Key!\nHãy lấy script từ Discord bằng lệnh /script.")
-    return
-end
+local inputKey = ""
+Tab:AddTextbox({
+	Name = "Nhập Key bản quyền",
+	Default = "",
+	TextDisappear = false,
+	Callback = function(Value) inputKey = Value end	  
+})
 
--- 2. Hàm kiểm tra xác thực lần cuối trước khi chạy script chính
-local function VerifyAuth()
-    local success, response = pcall(function()
-        return game:HttpGet(ServerURL .. "/api/check?key=" .. getgenv().TitanKey .. "&hwid=" .. HWID .. "&rid=" .. Player.UserId)
-    end)
+Tab:AddButton({
+	Name = "Kiểm tra & Khởi chạy",
+	Callback = function()
+        local Player = game.Players.LocalPlayer
+        local RID = tostring(Player.UserId) -- Tự động lấy Roblox ID
+        local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 
-    if success then
-        if response == "SUCCESS_GRANTED" then
-            print("✅ [TITAN] Xác thực thành công! Đang chạy script chính...")
-            return true
-        elseif response == "BLACKLISTED" then
-            Player:Kick("\n🛡️ [TITAN AUTH]\nBạn đã bị đưa vào danh sách đen (Blacklist)!")
-        elseif response == "WRONG_HWID" then
-            Player:Kick("\n🛡️ [TITAN AUTH]\nSai HWID! Vui lòng Reset HWID trên Web hoặc Discord.")
+        -- Gửi request check, Server sẽ tự liên kết RID nếu là lần đầu
+        local res = game:HttpGet(ServerURL .. "/api/check?key=" .. inputKey .. "&hwid=" .. HWID .. "&rid=" .. RID)
+
+        if res == "SUCCESS_GRANTED" then
+            OrionLib:MakeNotification({Name = "Thành công", Content = "Đã xác thực acc: "..Player.Name, Time = 3})
+            wait(1)
+            KeyWindow:Destroy()
+            StartMainScript() -- Chạy script farm của ông
         else
-            Player:Kick("\n🛡️ [TITAN AUTH]\nLỗi xác thực: " .. response)
+            OrionLib:MakeNotification({Name = "Lỗi", Content = "Thông báo: "..res, Time = 5})
         end
-    else
-        Player:Kick("\n🛡️ [TITAN AUTH]\nKhông thể kết nối tới Server xác thực!")
-    end
-    return false
+	end
+})
+
+-- HÀM CHỨA CODE FARM GỐC CỦA ÔNG
+function StartMainScript()
+    -- PHẦN CODE CHỌN TEAM CỦA ÔNG
+    repeat wait()
+        pcall(function()
+            if getgenv().Marines then
+                for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.Main.ChooseTeam.Container.Marines.Frame.ViewportFrame.TextButton.Activated)) do
+                    v.Function()
+                end
+            else
+                for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.Main.ChooseTeam.Container.Pirates.Frame.ViewportFrame.TextButton.Activated)) do
+                    v.Function()
+                end
+            end
+        end)
+    until game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam") and not game:GetService("Players").LocalPlayer.PlayerGui.Main:WaitForChild("ChooseTeam").Visible or not game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam")
+    
+    -- Dưới đây ông dán tiếp toàn bộ phần Orion Lib tạo Menu của file adz.lua cũ vào là xong.
+    print("Script đã liên kết thành công với Roblox ID!")
 end
 
 -- Chạy hàm check, nếu thất bại thì dừng toàn bộ script bên dưới
